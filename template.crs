@@ -1,0 +1,69 @@
+#!/usr/bin/env run-cargo-script
+//!
+//! This is a Rust script. It requires
+//! * Rust (https://www.rust-lang.org/)
+//! * cargo-script (https://crates.io/crates/cargo-script)
+//!   - `cargo install cargo-script`
+//!   - Windows (optional): `cargo-script file-association install` (associates .crs files with cargo-script)
+//!
+//! Execute it like this:
+//! * `cargo script template` or
+//! * `./template.crs` (*nix) / `template.crs` (Windows)
+//!
+//! ```cargo
+//! [dependencies]
+//! structopt = "0.2"
+//! duct = "0.11"
+//! ```
+
+#[macro_use]
+extern crate structopt;
+
+use std::path::PathBuf;
+use structopt::StructOpt;
+
+// NOTE: this is the 'basic' structopt example without comments
+#[derive(StructOpt, Debug)]
+#[structopt(name = "template")]
+struct Opt {
+    #[structopt(short = "d", long = "debug")]
+    debug: bool,
+    #[structopt(short = "v", long = "verbose", parse(from_occurrences))]
+    verbose: u8,
+    #[structopt(short = "s", long = "speed", default_value = "42")]
+    speed: f64,
+    #[structopt(short = "o", long = "output", parse(from_os_str))]
+    output: PathBuf,
+    #[structopt(short = "c", long = "nb-cars")]
+    nb_cars: Option<i32>,
+    #[structopt(short = "l", long = "level")]
+    level: Vec<String>,
+    #[structopt(name = "FILE", parse(from_os_str))]
+    files: Vec<PathBuf>,
+}
+
+#[macro_use]
+extern crate duct;
+
+use std::io;
+
+fn main() -> Result<(), io::Error> {
+    // getting command line options
+    let opt = Opt::from_args();
+    println!("{:?}", opt);
+
+    // calling external commands with duct.rs
+    let ls = cmd!("ls", "-lah").read()?;
+    println!("{}", ls);
+
+    // chaining external commands
+    let stdout = cmd!("echo", "-n", "part", "one", "")
+        .then(cmd!("echo", "part", "two"))
+        .pipe(cmd!("sed", "s/p/sm/g"))
+        .read()?;
+
+    println!("{}", stdout);
+
+    Ok(())
+}
+

@@ -1,0 +1,1 @@
+Small template for [`cargo-script`](https://crates.io/crates/cargo-script) that includes [`structopt`](https://crates.io/crates/structopt) and [`duct.rs`](https://github.com/oconnor663/duct.rs). To use it, copy `template.crs` to a new file and replace all occurences of `template` with your script's name. More details in `template.rs`.
